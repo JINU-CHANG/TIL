@@ -137,6 +137,56 @@ List<String> list = Arrays.asList("abc", "aaa", "bbb", "ddd", "aaa");
 Collections.sort(list, (s1, s2) -> s2.compareTo(s1));
 ```
 
+## 4. 함수형 인터페이스의 활용
+
+java.util.function 패키지에 일반적으로 자주 쓰이는 형식의 메서드를 함수형 인터페이스로 미리 정의해 놓았다. 매번 새로운 함수형 인터페이스를 정의하지 말고, 가능하면 이 패키지의 인터페이스를 활용하자. 그래야 메서드 이름도 통일되고, 재사용성이나 유지보수 측면에서 좋다.
+
+* 기본적인 함수형 인터페이스
+    |함수형 인터페이스|메서드|설명|
+    |------|---|---|
+    |Supplier<T>|T get()|매개변수는 없고, 반환값만 있다.|
+    |Consumer<T>|void accept(T t)|매개변수만 있고, 반환값이 없다.|
+    |Function<T,R>|R apply(T t)|일반적인 함수, 하나의 매개변수를 받아서 결과를 반환한다.|
+    |Predicate<T>|boolean test(T t)|조건식을 표현하는데 사용된다. 매개변수는 하나, 반환 타입은 boolean이다.|
+
+### 컬렉션 프레임웍과 함수형 인터페이스
+
+컬렉션 프레임윅의 인터페이스에 다수의 디폴트 메서드가 추가되었는데, 그 중 일부는 위에서 설명한 함수형 인터페이스를 사용한다.
+
+예를 들어, Iterable 인터페이스에 구현된 ``` void forEach(Consumer<T> action) ``` 메서드를 보자.
+
+```
+List<Integer> list = new ArrayList<>();
+
+for(int i=0; i<10; i++)
+    list.add(i);
+
+// list의 모든 요소를 출력
+list.forEach(i -> System.out.println(i+","));
+```
+
+List의 모든 요소를 출력하기 위해 forEach 메서드에 ```람다식(i -> System.out.println(i+",")) ``` 을 전달하였다. 람다식을 전달받아 forEach가 어떻게 동작하는지 아래의 코드에서 살펴보자.
+
+```
+default void forEach(Consumer<? super T> action) {
+        Objects.requireNonNull(action);
+        for (T t : this) {
+            action.accept(t);
+        }
+    }
+```
+
+람다식을 매개변수로 받아 Consumer 인터페이스의 accept 메서드를 오버라이딩한 것을 볼 수 있다.
+
+```
+Consumer action = new Consumer() {
+    public void accept(T t){
+        System.out.println(t+",");
+    }
+}
+```
+
+한마디로 람다식은 다음과 같이 익명클래스로 나타낼 수 있으며, forEach 메서드가 실행될 때 for문으로 List의 값을 하나씩 순회하면서 System.out.println(t) 를 실행한다.
 
 ---
 참고
