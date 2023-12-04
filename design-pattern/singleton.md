@@ -104,3 +104,65 @@ public static Settings getInstance() {
     - ![image](https://github.com/JINU-CHANG/dongguk-cafe/assets/98975580/1b03f915-e65f-4be8-a006-d1fd32346fea)
     - 스레드 A에서 instance 변수에 값을 할당했음에도 스레드 C가 다른 캐시에서 데이터를 읽는다면 instance 값이 null 일 수 있고 변수값 불일치 문제가 발생하게 된다.
     - 이런 문제를 해결하기 위해 CPU의 캐시를 거치지 않고 메인 메모리에 직접 read/write를 수행하는 volatile 변수를 사용한다.
+
+## 싱글톤 패턴 구현을 깨뜨릴 수 있는 방법 1
+
+### 리플렉션
+
+> 구체적인 클래스 타입을 모르더라도, 그 클래스의 메서드, 타입, 변수들에 접근할 수 있도록 해주는 
+자바 API
+
+- 애플리케이션이 실행될 때 JVM의 메모리에는 바이트 코드로 변환된 소스코드의 클래스, 메서드, 필드 등의 정보들이 메타데이터를 포함하여 메모리의 static 영역에 적재되는데, 리플렉션은 런타임에 해당 메타데이터의 정보에 접근해 특정 클래스에 대한 정보를 획득한다.
+
+```
+Settings settings = Settings.getInstance();
+Constructor<Settings> declaredConstructor = Settings.class.getDeclaredConstructor();
+declaredConstructor.setAccessible(true);
+Settings settings1 = declaredConstructor.newInstance();
+System.out.println(settings == settings1);
+```
+
+- getDeclaredConstructors() : 해당 클래스에 선언된 모든 생성자를 배열의 형태로 반환한다. **여기에는 private으로 선언된 생성자도 포함된다.**
+- getDeclaredConstructors()를 사용할 경우 **setAccessible(true)**라는 메서드를 추가로 작성해주는 것이 필요하다.
+- newInstance()로 새로운 인스턴스를 만들면, 처음에 만든 settings와 다른 객체가 생성된다.
+
+- 추가공부 필요
+    - https://velog.io/@alsgus92/Java-Reflection은-무엇이고-언제어떻게-사용하는-것이-좋을까
+    - https://thisisnew-storage.tistory.com/11#google_vignette
+
+### 직렬화 역직렬화
+
+> 직렬화 : Java의 객체를 외부에서도 사용할 수 있도록 바이트 형태로 데이터 변환하는 기술
+역직렬화 : 바이트로 변환된 데이터를 다시 객체로 변환하는 기술
+
+- https://steady-coding.tistory.com/576
+
+```
+Settings settings = Settings.getInstance();
+Settings settings1 = null;
+
+//직렬화 과정
+try (ObjectOutput out = new ObjectOutputStream(new FileOutputStream("settings.obj"))) {
+    out.writeObject(settings);
+}
+
+//역직렬화 과정
+try (ObjectInput in = new ObjectInputStream(new FileInputStream("settings.obj"))) {
+    settings1 = (Settings) in.readObject();
+}
+System.out.println(settings == settings1);
+```
+
+- **ObjectOutputStream**을 사용하여 파일에 **settings** 객체를 직렬화하고 저장한다.
+- **ObjectInputStream**을 사용하여 직렬화된 객체를 역직렬화하고, **settings1** 변수에 할당한다.
+- try-with-resource 블럭은 try문 탈출시 선언된 자원들을 모두 닫아주기 때문에 편리하다.
+
+## 싱글톤 구현 패턴 6 → ENUM
+
+> 리플렉션, 직렬화와 역직렬화에 안전한 싱글톤 구현 패턴
+
+- enum으로 싱글톤 타입을 구현할 때의 단점은?
+    - 싱글톤 구현 패턴 3에서와 같이 이른 초기화 (eager initialization)가 문제될 수 있다.
+    - 대부분의 경우에는 크게 문제가 없겠지만, 리소스에 민감한 애플리케이션의 경우에는 신경써야 될 듯?
+- 직렬화 & 역직렬화 시에 별도로 구현해야 하는 메소드가 있는가?
+    - ENUM 자체가 Serializable을 구현하고 있기 때문에 별다른 메소드 추가없이도 직렬화&역직렬화가 된다.
