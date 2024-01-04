@@ -117,27 +117,15 @@ Builder를 통해 객체를 생성한다는 점에서 전체적인 맥락은 비
 - Lombok의 @Builder
     - @Builder 를 붙여주면 클래스를 컴파일 할 때 자동으로 클래스 내부에 빌더 API가 만들어진다. @Builder는 심플 빌더 패턴을 다룬다.
 
-### 참고 정리 
-****@Builder, @All/NoArgsConstructor****
-
-@Builder와 @NoArgsConstructor 둘만 사용하게 되면 컴파일 에러가 발생한다.
-@Builder 어노테이션은 기본 생성자가 있는 경우 따로 생성자를 만들지 않는다. 반면 생성자가 존재하지 않을 경우 모든 멤버 변수를 파라미터로 받는 기본 생성자를 생성해준다.
-그런데 기본 생성자를 생성해주는 **@NoArgsConstructor**를 붙여주면 기본 생성자만 생성될 뿐 빌더에 사용될 생성자가 만들어지지 않아 오류가 발생한다. 따라서 이런 경우는 모든 필드를 파라미터로 가지는 생성자를 만드는 **@AllArgsConstructor**가 필요하다.
-
-→ 근데 @NoArgsConstructor 이거는 왜 필요한가 ? 굳이 안 써도 되지 않나 ?? 
-
-프록시 때문?? 
-https://hungseong.tistory.com/70
-
 - StringBuilder
     - 빌더에 해당하는 StringBuilder를 생성하고, 빌더가 제공하는 append 메서드로 파라미터를 구성하고, 최종적으로 toString을 호출해서 String 객체를 생성
-    
-    ```java
-    String result = new StringBuilder()
-                .append("hello ")
-                .append("world!")
-                .toString(); // build()
-    ```
+        ```java
+        String result = new StringBuilder()
+                    .append("hello ")
+                    .append("world!")
+                    .toString(); // build()
+        ```
     
 
-[https://inpa.tistory.com/entry/GOF-💠-빌더Builder-패턴-끝판왕-정리#빌더_패턴_탄생_배경](https://inpa.tistory.com/entry/GOF-%F0%9F%92%A0-%EB%B9%8C%EB%8D%94Builder-%ED%8C%A8%ED%84%B4-%EB%81%9D%ED%8C%90%EC%99%95-%EC%A0%95%EB%A6%AC#%EB%B9%8C%EB%8D%94_%ED%8C%A8%ED%84%B4_%ED%83%84%EC%83%9D_%EB%B0%B0%EA%B2%BD)
+* 참고
+    * [https://inpa.tistory.com/entry/GOF-💠-빌더Builder-패턴-끝판왕-정리#빌더_패턴_탄생_배경](https://inpa.tistory.com/entry/GOF-%F0%9F%92%A0-%EB%B9%8C%EB%8D%94Builder-%ED%8C%A8%ED%84%B4-%EB%81%9D%ED%8C%90%EC%99%95-%EC%A0%95%EB%A6%AC#%EB%B9%8C%EB%8D%94_%ED%8C%A8%ED%84%B4_%ED%83%84%EC%83%9D_%EB%B0%B0%EA%B2%BD)
